@@ -84,8 +84,19 @@ def ssr(server, port, method, passwd, *args, **kwargs):
     base_url = ss(server, port, method, passwd, scheme='ssr')
     return f'{base_url}?{"&".join([k+"="+v for k,v in kwargs.items()])}'
 
-def trojan(server, port, passwd, *args, **kwargs):
+def trojan(node):
     """
-    trojan scheme:
-        trojan://pass@host:port[?serverName=SERVERNAME][&skipVerify=true][&cert=PATH]
+    把普通的trojan节点格式化为glider支持的格式:
+    trojan://pass@host:port[?serverName=SERVERNAME][&skipVerify=true][&cert=PATH]
     """
+    if node['type']!= 'trojan':
+        return None
+    base_url = f'trojan://{node["password"]}@{node["server"]}:{node["port"]}'
+    params = {
+        'serverName':node['server'],
+        'skipVerify':node.get('skip-cert-verify') if node.get('skip-cert-verify') else 'true',
+    }
+    used_params = ['password', 'server', 'port','skip-cert-verify','type','name']
+    params.update({k:v for k,v in node.items() if k not in used_params})
+    url_params = '?' + '&'.join([f'{k}={v if isinstance(v, str) else str(v).lower()}' for k,v in params.items()])
+    return f'{base_url}{url_params}'

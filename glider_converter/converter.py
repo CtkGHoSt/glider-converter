@@ -4,6 +4,7 @@ import requests
 from proxy import proxyBase
 from proxy import encryptionBase as eb
 from proxy import serverBase as sb
+from proxy import *
 
 def load_nodes(url):
     rr = requests.get(url)
@@ -20,12 +21,6 @@ def check_nodes_type(func):
 
 @check_nodes_type
 def _format_ss(node):
-    method_list = ['AEAD_AES_128_GCM', 'AEAD_AES_192_GCM', 'AEAD_AES_256_GCM', 'AEAD_CHACHA20_POLY1305',
-        'AEAD_XCHACHA20_POLY1305', 'AES-128-CFB', 'AES-128-CTR', 'AES-192-CFB', 'AES-192-CTR', 'AES-256-CFB',
-        'AES-256-CTR', 'CHACHA20-IETF', 'XCHACHA20', 'CHACHA20', 'RC4-MD5', 'chacha20-ietf-poly1305',
-        'xchacha20-ietf-poly1305']
-    if node.get('cipher') not in method_list:
-        raise NameError(f'Unknown ss method: {node.get("cipher")}')
     ss_proxy = proxyBase(
         scheme=node['type'], 
         encryption=eb(passwd=node.get('password'), method=node.get('cipher')), 
@@ -45,6 +40,45 @@ def _format_ssr(node):
         **params
     )
     return f'{ssr_proxy}'
+
+@check_nodes_type
+def _format_vmess(node):
+    _is_tls = node.get('tls')
+    _network = node.get('network')
+    _is_ws = False if _network is None or _network != 'ws' else True
+    _ws_opts = node.get('ws-opts')
+    _headers = _ws_opts.get('headers') if _ws_opts else None
+    _path = _ws_opts.get('path') if _ws_opts else None
+    _host = _headers.get('Host') if _headers else None
+    _origin = _ws_opts.get('origin') if _ws_opts else None
+    _skipVerify = node.get('skip-cert-verify')
+    _serverName = node.get('servername')
+    server = node.get('server')
+    port = node.get('port')
+    uuid = node.get('uuid')
+    security = node.get('cipher')
+    alterId = node.get('alterId')
+    
+    if _is_tls:
+        tls_proxy = tls(server, port, skipVerify=_skipVerify, serverName=_serverName)
+        vmess_proxy = vmess(uuid, security=security, alterId=alterId)
+        if _is_ws:
+            ws_proxy = ws(path=_path, host=_host, origin=_origin)
+            return f'{tls_proxy},{ws_proxy},{vmess_proxy}'
+        else:
+            return f'{tls_proxy},{vmess_proxy}'
+    else:
+        if _is_ws:
+            ws_proxy = ws(server=server, port=port, path=_path, host=_host, origin=_origin)
+            vmess_proxy = vmess(uuid, security=security, alterId=alterId)
+            return f'{ws_proxy},{vmess_proxy}'
+        else:
+            return vmess(uuid, server=server, port=port, security=security, alterId=alterId)
+            
+@check_nodes_type
+def _format_trojan(node):
+    return trojan(node)
+
 
 def converter(node):
     try:
