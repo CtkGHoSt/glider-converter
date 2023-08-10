@@ -60,3 +60,8 @@ tls://converter.example.net:80?skipVerify=false,ws://@/windows?host=host.example
 # TODO
 - [ ] 根据订阅链接生成glider.conf
 
+# Links
+* https://github.com/nadoo/glider: glider is a forward proxy with multiple protocols support, and also a dns/dhcp server with ipset management features(like dnsmasq).
+* https://github.com/tindy2013/subconverter: Utility to convert between various subscription format
+* https://github.com/ACL4SSR/ACL4SSR: SSR 去广告ACL规则/SS完整GFWList规则/Clash规则碎片，Telegram频道订阅地址
+
