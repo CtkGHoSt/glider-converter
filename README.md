@@ -10,8 +10,8 @@ Based on the https://github.com/tindy2013/subconverter project, converting vario
 ```
 from converter import load_nodes, converter
 
-# clash subconverter node subscription links
 # clash subconverter node订阅链接
+# clash subconverter node subscription links
 link = 'abc.com'
 
 # 获取节点信息
