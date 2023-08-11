@@ -58,7 +58,7 @@ tls://converter.example.net:80?skipVerify=false,ws://@/windows?host=host.example
 ```
 
 # TODO
-- [ ] 忘记requirements.txt了
+- [x] 忘记requirements.txt了
 - [ ] 根据订阅链接生成glider.conf
 
 # Links
